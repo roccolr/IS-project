@@ -1,7 +1,7 @@
 package control;
 
 public class GestioneSistema {
-	private GestioneSistema gs = null;
+	private static GestioneSistema gs = null;
 	
 	protected GestioneSistema() {}
 	
