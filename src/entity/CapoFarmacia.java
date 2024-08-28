@@ -1,5 +1,9 @@
 package entity;
 
+import database.CapoFarmaciaDAO;
+import exception.DAOException;
+import exception.DBConnectionException;
+
 public class CapoFarmacia {
 	private String nome;
 	private String cognome;
@@ -36,5 +40,8 @@ public class CapoFarmacia {
 	}
 	public String getPassword() {
 		return this.password;
+	}
+	public void save() throws DAOException, DBConnectionException{
+		CapoFarmaciaDAO.createCapoFarmacia(this);
 	}
 }

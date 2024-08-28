@@ -1,5 +1,7 @@
 package database;
 import entity.Farmacia;
+import entity.Farmacista;
+import entity.CapoFarmacia;
 import java.util.*;
 import java.sql.*;
 import exception.DAOException;

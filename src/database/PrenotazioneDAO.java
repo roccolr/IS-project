@@ -27,7 +27,7 @@ public class PrenotazioneDAO {
 				
 				stmt.setString(1, d);
 				stmt.setString(2, o);
-				stmt.setString(3, p.cliente.getEmail());
+				stmt.setString(3, p.getCliente().getEmail());
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
@@ -66,8 +66,8 @@ public class PrenotazioneDAO {
 				
 				stmt.setString(1, data);
 				stmt.setString(2, orario);
-				stmt.setString(3, p.getVaccino().toString());
-				stmt.setString(4, p.getCliente().getEmail());
+				stmt.setString(3, p.getNomeVaccino());
+				stmt.setString(4, p.getEmailCliente());
 
 				stmt.executeUpdate();
 

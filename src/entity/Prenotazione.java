@@ -21,10 +21,18 @@ public class Prenotazione {
 		this.farmacia = farmacia;
 		this.cliente = cliente;
 		this.vaccino = vaccino;
-		this.nomeFarmacia = farmacia.getNome();
-		this.emailCliente = cliente.getEmail();
-		this.nomeVaccino = vaccino.toString();
-//		this.vaccinazione = vaccinazione;
+	}
+	
+	public Prenotazione(LocalDate data, LocalTime orario, String nomeFarmacia, String emailCliente, String nomeVaccino) {
+		this.farmacia = null;
+		this.cliente = null;
+		this.vaccino = null;
+		this.codice = 0;
+		this.data = data;
+		this.orario=orario;
+		this.nomeFarmacia = nomeFarmacia;
+		this.emailCliente = emailCliente;
+		this.nomeVaccino = nomeVaccino;
 	}
 	
 	public LocalDate getData() {

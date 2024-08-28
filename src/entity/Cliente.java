@@ -1,5 +1,9 @@
 package entity;
 
+import exception.DAOException;
+import exception.DBConnectionException;
+import database.ClienteDAO;
+
 public class Cliente {
 //	public static final int dimTestoAllergie = 100;
 	private String nome;
@@ -42,5 +46,8 @@ public class Cliente {
 	}
 	public void setAllergie(String allergie) {
 		this.allergie=allergie;
+	}
+	public void save()throws DAOException, DBConnectionException{
+		ClienteDAO.createCliente(this);
 	}
 }

@@ -1,6 +1,10 @@
 package entity;
 import java.util.*;
 
+import database.FarmacistaDAO;
+import exception.DAOException;
+import exception.DBConnectionException;
+
 public class Farmacista {
 	private String nome;
 	private String cognome;
@@ -59,5 +63,7 @@ public class Farmacista {
 	public void addTurno(Turno turno) {
 		this.Turni.add(turno);
 	}
-	
+	public void save() throws DAOException, DBConnectionException{
+		FarmacistaDAO.createFarmacista(this);
+	}
 }

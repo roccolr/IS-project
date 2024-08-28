@@ -15,7 +15,7 @@ public class ClienteDAO {
 				stmt.setString(2, c.getNome());
 				stmt.setString(3, c.getCognome());
 				stmt.setString(4, c.getAllergie());
-				stmt.setString(5, "");
+				stmt.setNull(1, Types.VARCHAR);
 				
 				stmt.executeUpdate();
 			}catch (SQLException e){

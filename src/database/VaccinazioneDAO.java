@@ -118,14 +118,10 @@ public class VaccinazioneDAO {
 	public static void createVaccinazione(Vaccinazione v) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
-			String query = "INSERT INTO VACCINAZIONI (ESITO, MOTIVAZIONE, CODICEPRENOTAZIONE, USERNAMEFARMACISTA, NOMEFARMACIA) VALUES (?,?,?,?,?);";
+			String query = "INSERT INTO VACCINAZIONI (CODICEPRENOTAZIONE) VALUES (?);";
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
-				stmt.setString(1, v.getEsito());
-				stmt.setString(2, v.getMotivazione());
-				stmt.setInt(3, v.getPrenotazione().getCodice());
-				stmt.setString(4, v.getUsernameFarmacista());
-				stmt.setString(5, v.getNomeFarmacia());
+				stmt.setInt(1, v.getCodicePrenotazione());
 				
 				stmt.executeUpdate();
 			}catch (SQLException e) {

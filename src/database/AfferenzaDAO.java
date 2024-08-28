@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import exception.DAOException;
 import exception.DBConnectionException;
 
-public class Afferenze {
+public class AfferenzaDAO {
 	public static void createAfferernza(String nomeFarmacia, String usernameCapoFarmacia) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
