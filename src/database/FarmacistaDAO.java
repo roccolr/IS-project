@@ -10,7 +10,7 @@ import exception.DAOException;
 import exception.DBConnectionException;
 
 public class FarmacistaDAO {
-	public static void createFarmacista (Farmacista f,) throws DAOException, DBConnectionException{
+	public static void createFarmacista (Farmacista f) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
 
