@@ -7,14 +7,16 @@ public class Farmacista {
 	private String username;
 	private String password;
 	private boolean dipendente;
+	private String nomeFarmacia;
 	private ArrayList<Turno> Turni;
 	
-	public Farmacista(String nome, String cognome, String username, String password, boolean dipendente) {
+	public Farmacista(String nome, String cognome, String username, String password, boolean dipendente, String nomeFarmacia) {
 		this.nome = nome;
 		this.cognome = cognome;
 		this.username = username;
 		this.password = password;
 		this.dipendente = dipendente;
+		this.nomeFarmacia = nomeFarmacia;
 		this.Turni = new ArrayList<>();
 	}
 	
@@ -33,6 +35,9 @@ public class Farmacista {
 	public void setDipendente(boolean dipendente) {
 		this.dipendente = dipendente;
 	}
+	public void setNomeFarmacia(String nomeFarmacia){
+		this.nomeFarmacia = nomeFarmacia;
+	}
 	public String getNome() {
 		return this.nome;
 	}
@@ -47,6 +52,9 @@ public class Farmacista {
 	}
 	public boolean isDipendente() {
 		return this.dipendente;
+	}
+	public String getNomeFarmacia(){
+		return this.nomeFarmacia;
 	}
 	public void addTurno(Turno turno) {
 		this.Turni.add(turno);

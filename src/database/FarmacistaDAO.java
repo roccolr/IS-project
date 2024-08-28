@@ -10,7 +10,7 @@ import exception.DAOException;
 import exception.DBConnectionException;
 
 public class FarmacistaDAO {
-	public static void createFarmacista (Farmacista f, String farmacia) throws DAOException, DBConnectionException{
+	public static void createFarmacista (Farmacista f,) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
 
@@ -24,7 +24,7 @@ public class FarmacistaDAO {
 				stmt.setString(3, f.getCognome());
 				stmt.setString(4, f.getPassword());
 				stmt.setBoolean(5, f.isDipendente());
-				stmt.setString(6, farmacia);
+				stmt.setString(6, f.getNomeFarmacia());
 
 				stmt.executeUpdate();
 
@@ -52,7 +52,7 @@ public class FarmacistaDAO {
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
-					f = new Farmacista(r.getString(2), r.getString(3), r.getString(1), r.getString(4), r.getBoolean(5));
+					f = new Farmacista(r.getString(2), r.getString(3), r.getString(1), r.getString(4), r.getBoolean(5), r.getString(6));
 				}
 			}catch(SQLException e) {
 				throw new DAOException("Errore lettura Farmacista...");

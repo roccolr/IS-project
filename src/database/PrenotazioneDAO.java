@@ -12,11 +12,11 @@ import java.time.format.DateTimeFormatter;
 
 public class PrenotazioneDAO {
 	
-	public static int getCodice(LocalDate data, LocalTime orario, Cliente c) throws DAOException, DBConnectionException{
+	public static int getCodice(Prenotazione p) throws DAOException, DBConnectionException{
 		int codice = -1;
-		String d = data.toString();
+		String d = p.getData().toString();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-		String o = orario.format(formatter);
+		String o = p.getOrario().format(formatter);
 		try {
 			Connection conn = DBManager.getConnection();
 
@@ -27,7 +27,7 @@ public class PrenotazioneDAO {
 				
 				stmt.setString(1, d);
 				stmt.setString(2, o);
-				stmt.setString(3, c.getEmail());
+				stmt.setString(3, p.cliente.getEmail());
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {

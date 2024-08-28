@@ -43,7 +43,7 @@ public class Prenotazione {
 		return this.vaccino;
 	}
 	public int getCodice() throws DAOException, DBConnectionException{
-		this.codice = PrenotazioneDAO.getCodice(data, orario, cliente);
+		this.codice = PrenotazioneDAO.getCodice(this);
 		return this.codice;
 	}
 	
