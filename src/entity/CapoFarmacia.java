@@ -37,5 +37,4 @@ public class CapoFarmacia {
 	public String getPassword() {
 		return this.password;
 	}
-	
 }
