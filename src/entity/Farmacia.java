@@ -6,14 +6,14 @@ public class Farmacia {
 	private String indirizzo;
 	private String email;
 	private CapoFarmacia capoFarmacia = null;
-	private ArrayList<Farmacista> Farmacisti;
+	private ArrayList<Farmacista> farmacisti;
 	
 	
 	public Farmacia(String nome, String indirizzo, String email) {
 		this.nome = nome;
 		this.indirizzo = indirizzo;
 		this.email = email;
-		this.Farmacisti = new ArrayList<>();
+		this.farmacisti = new ArrayList<>();
 	}
 	
 	public String getNome() {
@@ -29,7 +29,7 @@ public class Farmacia {
 		return this.capoFarmacia;
 	}
 	public ArrayList<Farmacista> getFarmacisti(){
-		return this.Farmacisti;
+		return this.farmacisti;
 	}
 	
 	public void setNome(String nome) {
@@ -45,8 +45,8 @@ public class Farmacia {
 	public void setCapoFarmacia(CapoFarmacia capoFarmacia) {
 		this.capoFarmacia = capoFarmacia;
 	}
-	public void addFarmacista(Farmacista farmacista) {
-		this.Farmacisti.add(farmacista);
+	public void setFarmacisti(ArrayList<Farmacista> farmacisti) {
+		this.farmacisti = farmacisti;
 	}
 	
 }

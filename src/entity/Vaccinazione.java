@@ -20,14 +20,14 @@ public class Vaccinazione {
 		this.farmacista = farmacista;
 	}
 	
-	public Vaccinazione(int codicePrenotazione) {
+	public Vaccinazione(int codicePrenotazione, String nomeFarmacia) {
 		this.esito = null;
 		this.motivazione = null;
 		this.codice = -1;
 		this.usernameFarmacista = null;
-		this.nomeFarmacia = null;
 		this.prenotazione = null;
 		this.farmacista = null;
+		this.nomeFarmacia = nomeFarmacia;
 		this.codicePrenotazione = codicePrenotazione;
 	}
 	

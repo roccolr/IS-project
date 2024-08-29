@@ -4,7 +4,6 @@ import java.sql.*;
 //import entity.CapoFarmacia;
 import entity.Prenotazione;
 //import entity.Farmacia;
-import entity.Cliente;
 import exception.DAOException;
 import exception.DBConnectionException;
 import java.time.*;
@@ -41,6 +40,40 @@ public class PrenotazioneDAO {
 				throw new DAOException("Errore lettura Prenotazione...");
 			}catch(DAOException ee) {
 				System.out.println(ee.getMessage());
+			}finally {
+				DBManager.closeConnection();
+			}
+		
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database");
+		}
+		return codice;
+	}
+	
+	public static int getCodice(LocalDate giorno, String emailCliente) throws DAOException, DBConnectionException{
+		int codice = -1;
+		String d = giorno.toString();
+		try {
+			Connection conn = DBManager.getConnection();
+
+			String query = "SELECT CODICE FROM PRENOTAZIONI WHERE DATA = ?, EMAILCLIENTE = ?;";
+
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				
+				stmt.setString(1, d);
+				stmt.setString(2, emailCliente);
+				
+				ResultSet r = stmt.executeQuery();
+				if(r.next()) {
+					codice = r.getInt(1);
+				}
+				else {
+					throw new DAOException("Errore: Nessuna Prenotazione trovata...");
+				}
+
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura Prenotazione...");
 			}finally {
 				DBManager.closeConnection();
 			}
@@ -113,5 +146,60 @@ public class PrenotazioneDAO {
 //		return p;
 //		
 //	}
+	
+	public static Prenotazione readPrenotazione(int codice)throws DAOException, DBConnectionException{
+		Prenotazione p = null;
+		try {
+			Connection conn = DBManager.getConnection();
+
+			String query = "SELECT P.CODICE, P.DATA, P.ORARIO, P.VACCINO, V.NOMEFARMACIA, P.EMAILCLIENTE FROM PRENOTAZIONI P JOIN VACCINAZIONI V ON P.CODICE = V.CODICEPRENOTAZIONE WHERE CODICE = ?;";
+
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				
+				stmt.setInt(1, codice);
+				
+				ResultSet r = stmt.executeQuery();
+				if(r.next()) {
+					LocalDate data = LocalDate.parse(r.getString(2));
+					LocalTime orario = LocalTime.parse(r.getString(3));
+					p = new Prenotazione(data, orario, r.getString(5), r.getString(6) , r.getString(4));
+				}
+				else {
+					throw new DAOException("Errore: Nessuna Prenotazione trovata...");
+				}
+
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura Prenotazione...");
+			}catch(DAOException ee) {
+				System.out.println(ee.getMessage());
+			}finally {
+				DBManager.closeConnection();
+			}
+		
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database");
+		}
+		return p;
+	}
+	
+	public static void deletePrenotazione(int codice) throws DAOException, DBConnectionException{
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "DELETE FROM PRENOTAZIONI WHERE CODICE = ?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setInt(1, codice);
+				stmt.executeUpdate();
+			}catch(SQLException e) {
+				throw new DAOException("Errore cancellazione Prenotazione...");
+			}
+			finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+	}
 	
 }

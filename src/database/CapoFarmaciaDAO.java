@@ -22,7 +22,7 @@ public class CapoFarmaciaDAO {
 				stmt.executeUpdate();
 
 			}catch(SQLException e) {
-				throw new DAOException("Errore scrittura CapoFarmacia");
+				throw new DAOException("Errore scrittura CapoFarmacia" + e.getMessage());
 			} finally {
 				DBManager.closeConnection();
 			}

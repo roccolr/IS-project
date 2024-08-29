@@ -76,6 +76,21 @@ CREATE TABLE TURNI(
 
 );
 
+CREATE TABLE CARTELLESTATISTICHE(
+	FARMACIA VARCHAR(50) PRIMARY KEY,
+	NUMEROPRENOTAZIONIGIORNALIERE INT NOT NULL,
+	NUMEROPRENOTAZIONISETTIMANALI INT NOT NULL,
+	NUMEROPRENOTAZIONIMENSILI INT NOT NULL,
+	NUMEROVACCINAZIONIGIORNALIERE INT NOT NULL,
+	NUMEROVACCINAZIONISETTIMANALI INT NOT NULL,
+	NUMEROVACCINAZIONIMENSILI INT NOT NULL,
+	NUMEROANNULLAMENTIGIORNALIERI INT NOT NULL,
+	NUMEROANNULLAMENTISETTIMANALI INT NOT NULL,
+	NUMEROANNULLAMENTIMENSILI INT NOT NULL,
+	
+	CONSTRAINT FK_CART_FARM FOREIGN KEY (FARMACIA) REFERENCES FARMACIE(NOME)
+);
+
 
 INSERT INTO FARMACIE (NOME, EMAIL, VIA, CIVICO, CAP, CITTA) VALUES 
 ('Farmacia Centrale', 'centrale@example.com', 'Via Roma', '10', '00100', 'Roma'),
@@ -88,4 +103,16 @@ INSERT INTO FARMACIE (NOME, EMAIL, VIA, CIVICO, CAP, CITTA) VALUES
 ('Farmacia Bologna', 'bologna@example.com', 'Via Rizzoli', '20', '40100', 'Bologna'),
 ('Farmacia Palermo', 'palermo@example.com', 'Via Maqueda', '35', '90100', 'Palermo'),
 ('Farmacia Verona', 'verona@example.com', 'Via Mazzini', '25', '37100', 'Verona');
+
+INSERT INTO CARTELLESTATISTICHE VALUES
+('Farmacia Centrale', 0,0,0,0,0,0,0,0,0),
+('Farmacia San Marco', 0,0,0,0,0,0,0,0,0),
+('Farmacia del Corso', 0,0,0,0,0,0,0,0,0),
+('Farmacia Firenze', 0,0,0,0,0,0,0,0,0),
+('Farmacia Napoli', 0,0,0,0,0,0,0,0,0),
+('Farmacia Torino', 0,0,0,0,0,0,0,0,0),
+('Farmacia Genova', 0,0,0,0,0,0,0,0,0),
+('Farmacia Bologna', 0,0,0,0,0,0,0,0,0),
+('Farmacia Palermo', 0,0,0,0,0,0,0,0,0),
+('Farmacia Verona', 0,0,0,0,0,0,0,0,0);
 

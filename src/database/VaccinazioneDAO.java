@@ -1,5 +1,7 @@
 package database;
 import java.sql.*;
+
+import entity.CapoFarmacia;
 import entity.Vaccinazione;
 import exception.DAOException;
 import exception.DBConnectionException;
@@ -14,6 +16,33 @@ public class VaccinazioneDAO {
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setInt(1, v.getPrenotazione().getCodice());
+				
+				ResultSet r = stmt.executeQuery();
+				if(r.next()) {
+					codice = r.getInt(1);
+				}
+				else throw new DAOException("Errore: Nessuna riscontro trovato nel DB...");
+			}catch (SQLException e) {
+				throw new DAOException("Errore query Vaccinazione...");
+			}catch(DAOException d) {
+				System.out.println(d.getMessage());
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return codice;
+	}
+	
+	public static int getCodice(int codicePrenotazione) throws DAOException, DBConnectionException{
+		int codice = -1;
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT CODICE FROM VACCINAZIONI WHERE CODICEPRENOTAZIONE = ?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setInt(1, codicePrenotazione);
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
@@ -114,14 +143,41 @@ public class VaccinazioneDAO {
 		return codicePrenotazione;
 	}
 	
+//	public static Vaccinazione readVaccinazione(int codice) throws DAOException, DBConnectionException{
+//		Vaccinazione v = null;
+//		try {
+//			Connection conn = DBManager.getConnection();
+//			
+//			String query = "SELECT * FROM VACCINAZIONI WHERE CODICE = ?;";
+//			
+//			try {
+//				PreparedStatement stmt = conn.prepareStatement(query);
+//				stmt.setString(1, codice);
+//				
+//				ResultSet r = stmt.executeQuery();
+//				if(r.next()) {
+//					v = new Vaccinazione()
+//				}
+//			}catch(SQLException e) {
+//				throw new DAOException("Errore lettura CapoFarmacia...");
+//			}finally {
+//				DBManager.closeConnection();
+//			}
+//		}catch(SQLException e) {
+//			throw new DBConnectionException("Errore connessione database...");
+//		}
+//		return v;
+//	}
+	
 	
 	public static void createVaccinazione(Vaccinazione v) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
-			String query = "INSERT INTO VACCINAZIONI (CODICEPRENOTAZIONE) VALUES (?);";
+			String query = "INSERT INTO VACCINAZIONI (CODICEPRENOTAZIONE, NOMEFARMACIA) VALUES (?, ?);";
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setInt(1, v.getCodicePrenotazione());
+				stmt.setString(2, v.getNomeFarmacia());
 				
 				stmt.executeUpdate();
 			}catch (SQLException e) {

@@ -1,7 +1,5 @@
 package database;
 import entity.Farmacia;
-import entity.Farmacista;
-import entity.CapoFarmacia;
 import java.util.*;
 import java.sql.*;
 import exception.DAOException;
@@ -40,7 +38,7 @@ public class FarmaciaDAO {
 		}
 	}
 	
-	public static Farmacia readFarmacia(String nome) throws DAOException, DBConnectionException{
+	public static Farmacia readFarmaciaFromNome(String nome) throws DAOException, DBConnectionException{
 		Farmacia f = null;
 		try {
 			Connection conn = DBManager.getConnection();
@@ -48,6 +46,35 @@ public class FarmaciaDAO {
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setString(1, nome);
+				
+				ResultSet r = stmt.executeQuery();
+				if(r.next()) {
+					String via = r.getString(3);
+					String civico = r.getString(4);
+					String cap = r.getString(5);
+					String citta = r.getString(6);
+					String indirizzo = String.join(" ", via, civico, cap, citta);
+					f = new Farmacia(r.getString(1), indirizzo, r.getString(2));
+				}
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura Farmacia...");
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return f;
+	}
+	
+	public static Farmacia readFarmaciaFromEmail(String email)throws DAOException, DBConnectionException{
+		Farmacia f = null;
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT * FROM FARMACIE WHERE EMAIL = ?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setString(1, email);
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {

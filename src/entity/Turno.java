@@ -10,10 +10,10 @@ public class Turno {
 	private int codice;
 	private String usernameFarmacista;
 	
-	public Turno(int tipo, LocalDate data, String username) {
+	public Turno(int tipo, LocalDate data, String usernameFarmacista) {
 		this.tipo=tipo;
 		this.data=data;
-		this.usernameFarmacista = username;
+		this.usernameFarmacista = usernameFarmacista;
 	}
 	
 	public int getTipo() {

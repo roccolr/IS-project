@@ -47,6 +47,9 @@ public class Cliente {
 	public void setAllergie(String allergie) {
 		this.allergie=allergie;
 	}
+	public void setDatiAnamnestici(String datiAnamnestici) {
+		this.datiAnamnestici = datiAnamnestici;
+	}
 	public void save()throws DAOException, DBConnectionException{
 		ClienteDAO.createCliente(this);
 	}

@@ -24,13 +24,16 @@ public class FarmacistaDAO {
 				stmt.setString(2, f.getNome());
 				stmt.setString(3, f.getCognome());
 				stmt.setString(4, f.getPassword());
-				stmt.setBoolean(5, f.isDipendente());
-				stmt.setString(6, f.getNomeFarmacia());
-
+				stmt.setBoolean(6, f.isDipendente());
+				stmt.setString(5, f.getNomeFarmacia());
+				
+//				System.out.println(f.getNome() + " " + f.getCognome() + f.getUsername() + f.getPassword() + f.isDipendente());
+				
 				stmt.executeUpdate();
+//				System.out.println("debug");
 
 			}catch(SQLException e) {
-				throw new DAOException("Errore scrittura Farmacista");
+				throw new DAOException("Errore scrittura Farmacista" + e.getMessage() + " " + e.getErrorCode());
 			} finally {
 				DBManager.closeConnection();
 			}

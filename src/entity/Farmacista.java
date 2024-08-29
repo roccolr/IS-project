@@ -12,7 +12,7 @@ public class Farmacista {
 	private String password;
 	private boolean dipendente;
 	private String nomeFarmacia;
-	private ArrayList<Turno> Turni;
+	private ArrayList<Turno> turni;
 	
 	public Farmacista(String nome, String cognome, String username, String password, boolean dipendente, String nomeFarmacia) {
 		this.nome = nome;
@@ -21,7 +21,7 @@ public class Farmacista {
 		this.password = password;
 		this.dipendente = dipendente;
 		this.nomeFarmacia = nomeFarmacia;
-		this.Turni = new ArrayList<>();
+		this.turni = null;
 	}
 	
 	public void setNome(String nome) {
@@ -42,6 +42,9 @@ public class Farmacista {
 	public void setNomeFarmacia(String nomeFarmacia){
 		this.nomeFarmacia = nomeFarmacia;
 	}
+	public void setTurni(ArrayList<Turno> turni) {
+		this.turni = turni;
+	}
 	public String getNome() {
 		return this.nome;
 	}
@@ -60,10 +63,11 @@ public class Farmacista {
 	public String getNomeFarmacia(){
 		return this.nomeFarmacia;
 	}
-	public void addTurno(Turno turno) {
-		this.Turni.add(turno);
+	public ArrayList<Turno> getTurni(){
+		return this.turni;
 	}
 	public void save() throws DAOException, DBConnectionException{
 		FarmacistaDAO.createFarmacista(this);
+//		System.out.println("debug");
 	}
 }
