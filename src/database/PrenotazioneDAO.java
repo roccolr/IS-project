@@ -19,14 +19,14 @@ public class PrenotazioneDAO {
 		try {
 			Connection conn = DBManager.getConnection();
 
-			String query = "SELECT CODICE FROM PRENOTAZIONI WHERE DATA = ?, ORARIO = ?, EMAILCLIENTE = ?;";
-
+			String query = "SELECT CODICE FROM PRENOTAZIONI WHERE DATA = ? AND ORARIO = ? AND EMAILCLIENTE = ?;";
+//			System.out.println(d + " " + o + " " + p.getEmailCliente());
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				
 				stmt.setString(1, d);
 				stmt.setString(2, o);
-				stmt.setString(3, p.getCliente().getEmail());
+				stmt.setString(3, p.getEmailCliente());
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
@@ -56,7 +56,7 @@ public class PrenotazioneDAO {
 		try {
 			Connection conn = DBManager.getConnection();
 
-			String query = "SELECT CODICE FROM PRENOTAZIONI WHERE DATA = ?, EMAILCLIENTE = ?;";
+			String query = "SELECT CODICE FROM PRENOTAZIONI WHERE DATA = ? AND EMAILCLIENTE = ?;";
 
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
@@ -88,7 +88,7 @@ public class PrenotazioneDAO {
 		String data = p.getData().toString();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 		String orario = p.getOrario().format(formatter);
-		
+//		System.out.println(data + " " + orario + " " + p.getNomeVaccino() + " " + p.getEmailCliente());
 		try {
 			Connection conn = DBManager.getConnection();
 
@@ -101,8 +101,8 @@ public class PrenotazioneDAO {
 				stmt.setString(2, orario);
 				stmt.setString(3, p.getNomeVaccino());
 				stmt.setString(4, p.getEmailCliente());
-
 				stmt.executeUpdate();
+//				System.out.println("debug");
 
 			}catch(SQLException e) {
 				throw new DAOException("Errore scrittura Prenotazione");
@@ -152,7 +152,7 @@ public class PrenotazioneDAO {
 		try {
 			Connection conn = DBManager.getConnection();
 
-			String query = "SELECT P.CODICE, P.DATA, P.ORARIO, P.VACCINO, V.NOMEFARMACIA, P.EMAILCLIENTE FROM PRENOTAZIONI P JOIN VACCINAZIONI V ON P.CODICE = V.CODICEPRENOTAZIONE WHERE CODICE = ?;";
+			String query = "SELECT P.CODICE, P.DATA, P.ORARIO, P.VACCINO, V.NOMEFARMACIA, P.EMAILCLIENTE FROM PRENOTAZIONI P JOIN VACCINAZIONI V ON P.CODICE = V.CODICEPRENOTAZIONE WHERE P.CODICE = ?;";
 
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
@@ -191,8 +191,9 @@ public class PrenotazioneDAO {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setInt(1, codice);
 				stmt.executeUpdate();
+//				System.out.println("debug");
 			}catch(SQLException e) {
-				throw new DAOException("Errore cancellazione Prenotazione...");
+				throw new DAOException("Errore cancellazione Prenotazione..." + e.getMessage());
 			}
 			finally {
 				DBManager.closeConnection();
@@ -202,4 +203,30 @@ public class PrenotazioneDAO {
 		}
 	}
 	
+	public static int getConteggioPrenotazioni(Prenotazione p) throws DAOException, DBConnectionException{
+		int res = 0;
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT COUNT(*) FROM PRENOTAZIONI WHERE DATA= ? AND EMAILCLIENTE = ?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setString(1, p.getData().toString());
+				stmt.setString(2, p.getEmailCliente());
+				ResultSet r = stmt.executeQuery();
+				
+				if(r.next()) {
+					res = r.getInt(1);
+				}
+//				System.out.println(res);
+			}catch(SQLException e) {
+				throw new DAOException("Errore query count(*) Prenotazione...");
+			}
+			finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return res;
+	}
 }

@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.util.*;
 import entity.*;
@@ -27,7 +29,9 @@ public class GestioneSistema {
 	}
 	
 	
-	private static void inviaMail(String emailDestinario, String corpo) {}
+	private static void inviaMail(String emailDestinatario, String corpo) {
+		System.out.println(emailDestinatario + " ha ricevuto:\n\n" + corpo);
+	}
 	
 	private static void inviaEmailCredenziali(CapoFarmacia cF, String emailCapoFarmacia) {
 		String corpo = "Username: " + cF.getUsername() + " Password: " + cF.getPassword();
@@ -238,7 +242,8 @@ public class GestioneSistema {
 		return turni;
 	}
 	
- 	public void prenotaVaccino(String nomeFarmacia, String giorno, String vaccino, String nome, String cognome, String email, String allergie)throws DAOException, DBConnectionException,OperationException {
+	
+ 	public void prenotaVaccino(String nomeFarmacia, String giorno, String vaccino, String nome, String cognome, String email, String allergie)throws OperationException {
 		ArrayList<String> nomiFarmacie = null;
 		ArrayList<LocalTime> listaOrari = null;
 		ArrayList<String> emailClienti = null;
@@ -247,14 +252,14 @@ public class GestioneSistema {
 //		LocalTime maxOrario = LocalTime.of(20, 0, 0);
 		Cliente c = null;
 		Farmacia f = null;
-		int codicePrenotazione;
+//		int codicePrenotazione;
 		
 		try {
 			nomiFarmacie = getNomiFarmacie();
 		}catch(DAOException e) {
-			throw new OperationException("Errore durante la lettura dei nomi farmacia");
+			throw new OperationException("Errore durante la lettura dei nomi farmacia; " + e.getMessage());
 		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per la lettura nomi farmacia");
+			throw new OperationException("Errore durante la connessione al database per la lettura nomi farmacia; " + e.getMessage());
 		}
 		
 		//check sul nomeFarmacia
@@ -276,8 +281,10 @@ public class GestioneSistema {
 		//Trova un orario disponibile per quel giorno
 		try {
 			listaOrari = getOrari(data, nomeFarmacia);
+		}catch(DBConnectionException e){
+			throw new OperationException("Getting lista orari on DB:" + e.getMessage());
 		}catch(DAOException e) {
-			throw new OperationException(e.getMessage());
+			throw new OperationException("Getting lista orari: "+e.getMessage());
 		}
 		if(listaOrari.isEmpty()) orario = LocalTime.of(8, 0, 0);
 		else {
@@ -288,25 +295,7 @@ public class GestioneSistema {
 			if(orario == null) throw new OperationException("Errore: nessun orario trovato per quel giorno...");
 		}
 		
-		Prenotazione p = new Prenotazione(data, orario, nomeFarmacia, email, vaccino);
-		try {
-			p.save();
-			codicePrenotazione = p.getCodice();
-		}catch(DAOException e) {
-			throw new OperationException("Errore durante il salvataggio della prenotazione");
-		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per il salvataggio della prenotazione");
-		}
-		
-		Vaccinazione v = new Vaccinazione(codicePrenotazione, p.getNomeFarmacia());
-		try {
-			v.save();
-		}catch(DAOException e) {
-			throw new OperationException("Errore durante il salvataggio della vaccinazione");
-		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per il salvataggio della vaccinazione");
-		}
-		
+		//eventuale salvataggio del cliente
 		try {
 			emailClienti = getEmailClienti();
 			if(!emailClienti.contains(email)) {
@@ -318,18 +307,44 @@ public class GestioneSistema {
 			}
 			
 		}catch(DAOException e) {
-			throw new OperationException("Errore durante il salvataggio del Cliente");
+			throw new OperationException(e.getMessage());
 		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per il salvataggio del Cliente");
+			throw new OperationException(e.getMessage());
+		}
+		
+		Prenotazione p = new Prenotazione(data, orario, nomeFarmacia, email, vaccino);
+		try {
+			if(p.isAlreadySaved()) throw new OperationException("Errore: Prenotazione già salvata nel sistema");
+			else{
+				p.save();
+//				codicePrenotazione = p.getCodice();
+			}
+		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
+		}catch(OperationException e) {
+			throw new OperationException(e.getMessage());
+		}
+		
+//		System.out.println("debug");
+		try {
+			Vaccinazione v = new Vaccinazione(p.getCodice(), p.getNomeFarmacia());
+			v.save();
+//			System.out.println("debug");
+		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
 		}
 		
 		try {
 			f = FarmaciaDAO.readFarmaciaFromNome(nomeFarmacia);
 			
 		}catch(DAOException e) {
-			throw new OperationException("Errore durante la lettura della Farmacia");
+			throw new OperationException(e.getMessage());
 		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per la lettura Farmacia");
+			throw new OperationException(e.getMessage());
 		}
 		
 		inviaEmailRiepilogoPrenotazione(c, p, f);
@@ -339,6 +354,8 @@ public class GestioneSistema {
 			CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
 			cS.incrementaPrenotazioni();
 			cS.save();
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
 		}catch(DAOException e) {
 			throw new OperationException(e.getMessage());
 		}
@@ -346,7 +363,7 @@ public class GestioneSistema {
 		
 	}
 	
-	public void registraCapoFarmacia(String nome, String cognome, String username, String password, String nomeFarmacia, String emailCapoFarmacia) throws DAOException, DBConnectionException,OperationException{
+	public void registraCapoFarmacia(String nome, String cognome, String username, String password, String nomeFarmacia, String emailCapoFarmacia) throws OperationException{
 		ArrayList<String> nomiFarmacie = null;
 		ArrayList<String> usernameCapiFarmacia = null;
 		//si suppone che l'anagrafica del CapoFarmacia sia stata già controllata
@@ -355,9 +372,9 @@ public class GestioneSistema {
 		try {
 			nomiFarmacie = getNomiFarmacie();
 		}catch(DAOException e) {
-			throw new OperationException("Errore durante la lettura dei nomi farmacia");
+			throw new OperationException("Errore durante la lettura dei nomi farmacia " + e.getMessage());
 		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per la lettura nomi farmacia");
+			throw new OperationException("Errore durante la connessione al database per la lettura nomi farmacia " + e.getMessage());
 		}
 		
 		if(!(nomiFarmacie.contains(nomeFarmacia))) throw new OperationException("Errore: La farmacia non memorizzata nel sistema");
@@ -368,17 +385,17 @@ public class GestioneSistema {
 			if(usernameCapiFarmacia.contains(cF.getUsername())) throw new OperationException("CapoFarmacia già presente nel sistema");
 			else cF.save();
 		}catch(DAOException e) {
-			throw new OperationException("Errore durante il salvataggio del CapoFarmacia");
+			throw new OperationException("Errore durante il salvataggio del CapoFarmacia "+e.getMessage());
 		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per il salvataggio del CapoFarmacia");
+			throw new OperationException("Errore durante la connessione al database per il salvataggio del CapoFarmacia " + e.getMessage());
 		}
 		
 		try {
 			AfferenzaDAO.createAfferernza(nomeFarmacia, cF.getUsername());
 		}catch(DAOException e) {
-			throw new OperationException("Errore durante il salvataggio dell'afferenza");
+			throw new OperationException("Errore durante il salvataggio dell'afferenza " + e.getMessage());
 		}catch(DBConnectionException e) {
-			throw new OperationException("Errore durante la connessione al database per il salvataggio dell'afferenza");
+			throw new OperationException("Errore durante la connessione al database per il salvataggio dell'afferenza " + e.getMessage());
 		}
 		
 		inviaEmailCredenziali(cF, emailCapoFarmacia);
@@ -415,8 +432,16 @@ public class GestioneSistema {
 	}
 	
 	//Il metodo cancellaAppuntamento è sovraccaricato: Uno è usato da Cliente, uno da CapoFarmacia
-	public void cancellaAppuntamento(String emailCliente, String giorno, String emailFarmacia) throws DAOException, DBConnectionException,OperationException{
-		Farmacia f = FarmaciaDAO.readFarmaciaFromEmail(emailFarmacia);
+	public void cancellaAppuntamento(String emailCliente, String giorno, String emailFarmacia) throws OperationException{
+		Farmacia f = null;
+		try {
+			f = FarmaciaDAO.readFarmaciaFromEmail(emailFarmacia);
+		}catch(DAOException e) {
+			throw new OperationException("Errore durante la cancellazione dell'appuntamento: " + e.getMessage());
+		}catch(DBConnectionException e) {
+			throw new OperationException("Errore durante la cancellazione dell'appuntamento: " + e.getMessage());
+		}
+		
 		LocalDate data = LocalDate.parse(giorno);
 		ArrayList<String> listaEmailClienti = null;
 		int codice;
@@ -428,33 +453,43 @@ public class GestioneSistema {
 			listaEmailClienti = getEmailClienti();
 			try {
 				if(!listaEmailClienti.contains(emailCliente)) throw new OperationException("Errore, l'email indicata non è valida...");
-			}catch(OperationException e){
+			}catch(OperationException e) {
 				throw e;
 			}
 		}catch(DAOException e) {
 			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e){
+			throw new OperationException(e.getMessage());
 		}
 		
 		
-		//ATTENZIONE: Il sistema deve controllare che un cliente non faccia la stessa prenotazione per due volte in due 
+		//ATTENZIONE: Il sistema deve controllare che un cliente non faccia la stessa prenotazione più volte in  
 		//farmacie diverse: controlla la funzione prenotaVaccino()
 		
 		try {
 			codice = PrenotazioneDAO.getCodice(data, emailCliente);
+//			System.out.println("debug");
 		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e){
 			throw new OperationException(e.getMessage());
 		}
 		
 		inviaEmailDisdetta(emailCliente, emailFarmacia, codice);
 	}
 	
-	public void cancellaAppuntamento(int codicePrenotazione) throws DAOException, DBConnectionException,OperationException{
+	public void cancellaAppuntamento(int codicePrenotazione) throws OperationException{
 		String nomeFarmacia = null;
 		
 		try {
 			Prenotazione p = PrenotazioneDAO.readPrenotazione(codicePrenotazione);
 			nomeFarmacia = p.getNomeFarmacia();
+			int codiceVaccinazione = VaccinazioneDAO.getCodice(codicePrenotazione);
+			VaccinazioneDAO.deleteVaccinazione(codiceVaccinazione);
 			PrenotazioneDAO.deletePrenotazione(codicePrenotazione);
+//			System.out.println("debug");
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
 		}catch(DAOException e) {
 			throw new OperationException(e.getMessage());
 		}
@@ -463,49 +498,99 @@ public class GestioneSistema {
 			CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
 			cS.incrementaAnnullamenti();
 			cS.save();
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
 		}catch(DAOException e) {
 			throw new OperationException(e.getMessage());
 		}
 	}
 	
 	
-	public void inserisciTurniSettimana(String nomeFarmacia, HashMap<String, ArrayList<Turno>> turniNextWeek) throws DAOException, DBConnectionException,OperationException{
-		//un CapoFarmacia, per ogni turno della settimana successiva, assegna un Farmacista della farmacia a cui afferisce.
-		//La map K = Username farmacista, V Lista di turni a lui associata
-		Farmacia f = null;
-		String usernameCapoFarmacia = null;
-		ArrayList<String> usernameFarmacisti = null; 
-		ArrayList<Farmacista> farmacisti = new ArrayList<>();
-		CapoFarmacia cF = null;
-		
-		
-		try {
-			f = FarmaciaDAO.readFarmaciaFromNome(nomeFarmacia);
-			usernameCapoFarmacia = AfferenzaDAO.readCapoFarmaciaFromFarmacia(f.getNome());
-			cF = CapoFarmaciaDAO.readCapoFarmacia(usernameCapoFarmacia);
-			f.setCapoFarmacia(cF);
-			usernameFarmacisti = getUsernameFarmacisti(f.getNome());
-			for(ListIterator<String> iterator = usernameFarmacisti.listIterator(); iterator.hasNext();) {
-				farmacisti.add(FarmacistaDAO.readFarmacista(iterator.next()));
-			}
-			f.setFarmacisti(farmacisti);
+	public void inserisciTurniSettimana(String nomeFarmacia) throws OperationException{
+		try {	
+			LocalDate today = LocalDate.now();
+			LocalDate nextMonday = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+			LocalDate giorno = nextMonday;
 			
-			for(Farmacista farmacista : f.getFarmacisti()) {
-				farmacista.setTurni(turniNextWeek.get(farmacista.getUsername()));
-				for(Turno t : farmacista.getTurni()) {
+			ArrayList <String> nomiFarmacie = getNomiFarmacie();
+			if(!(nomiFarmacie.contains(nomeFarmacia)))throw new OperationException("Errore inserimento turno: La farmacia non esiste...");
+			
+			ArrayList <String> usernameFarmacisti = getUsernameFarmacisti(nomeFarmacia); 
+			
+			Scanner scanner = new Scanner(System.in);
+			try {
+				for(int i=0; i<14; i++) {
+					if(i%2 == 0 && i!= 0) giorno=giorno.plusDays(1);
+					Turno t = new Turno(0, giorno, null);
+					if(i%2 == 0) {
+						t.setTipo(0);
+						System.out.println("Inserire farmacista per il turno di mattina del " + t.getData());
+					}
+					else {
+						t.setTipo(1);
+						System.out.println("Inserire farmacista per il turno di pomeriggio/sera del " + t.getData());
+					}
+					String usernameFarmacista = scanner.nextLine();
+					if(!(usernameFarmacisti.contains(usernameFarmacista))) throw new OperationException("Errore: Farmacista non appartenente alla farmacia");
+					t.setUsernameFarmacista(usernameFarmacista);
 					t.save();
 				}
+			}catch(NoSuchElementException e) {
+				throw new OperationException("Errore con l'input da tastiera...");
+			}finally {
+				scanner.close();
 			}
-			
 		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
 			throw new OperationException(e.getMessage());
 		}
 	}
 	
-	public void stampaAppuntamenti(String usernameFarmacista, LocalDate data)throws DAOException, DBConnectionException,OperationException {
-		ArrayList<Turno> turni = getTurni(data);
-//		ArrayList<Prenotazione> prenotazioni = new ArrayList<>();
-		HashMap<Prenotazione, ArrayList<String>> daStampare = new HashMap<>();
+//	public void inserisciTurniSettimana(String nomeFarmacia, HashMap<Turno, String> turniNextWeek) throws DAOException, DBConnectionException,OperationException{
+//		//un CapoFarmacia, per ogni turno della settimana successiva, assegna un Farmacista della farmacia a cui afferisce.
+//		//La map K = Username farmacista, V Lista di turni a lui associata
+//		Farmacia f = null;
+//		String usernameCapoFarmacia = null;
+//		ArrayList<String> usernameFarmacisti = null; 
+//		ArrayList<Farmacista> farmacisti = new ArrayList<>();
+//		CapoFarmacia cF = null;
+//		
+//		
+//		try {
+//			f = FarmaciaDAO.readFarmaciaFromNome(nomeFarmacia);
+//			usernameCapoFarmacia = AfferenzaDAO.readCapoFarmaciaFromFarmacia(f.getNome());
+//			cF = CapoFarmaciaDAO.readCapoFarmacia(usernameCapoFarmacia);
+//			f.setCapoFarmacia(cF);
+//			usernameFarmacisti = getUsernameFarmacisti(f.getNome());
+//			for(ListIterator<String> iterator = usernameFarmacisti.listIterator(); iterator.hasNext();) {
+//				farmacisti.add(FarmacistaDAO.readFarmacista(iterator.next()));
+//			}
+//			f.setFarmacisti(farmacisti);
+//			
+//			for(Farmacista farmacista : f.getFarmacisti()) {
+//				farmacista.setTurni(turniNextWeek.get(farmacista.getUsername()));
+//				for(Turno t : farmacista.getTurni()) {
+//					t.save();
+//				}
+//			}
+//			
+//		}catch(DAOException e) {
+//			throw new OperationException(e.getMessage());
+//		}
+//	}
+	
+	public void stampaAppuntamenti(String usernameFarmacista, LocalDate data)throws OperationException {
+		ArrayList<Turno> turni = null;
+		try {
+			turni = getTurni(data);
+			
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}
+		TreeMap<Prenotazione, ArrayList<String>> daStampare = new TreeMap<>();
 		String orarioPrimoAppuntamentoMattina = "08:00:00";
 		String orarioUltimoAppuntamentoMattina = "13:45:00";
 		String orarioPrimoAppuntamentoSera= "14:00:00";
@@ -519,7 +604,11 @@ public class GestioneSistema {
 		try {
 			try {
 				Connection conn = DBManager.getConnection();
-				String query = "SELECT P.CODICE, C.NOME, C.COGNOME FROM PRENOTAZIONI P JOIN CLIENTI C ON C.EMAIL = P.EMAILCLIENTE WHERE DATA = ? AND ORARIO BETWEEN ? AND ?;";
+				String query = "SELECT P.DATA, P.ORARIO, V.NOMEFARMACIA, P.EMAILCLIENTE, P.VACCINO, C.NOME, C.COGNOME " + 
+							   "FROM PRENOTAZIONI P JOIN CLIENTI C ON C.EMAIL = P.EMAILCLIENTE " +
+							   "JOIN VACCINAZIONI V ON P.CODICE = V.CODICEPRENOTAZIONE " +
+							   "WHERE DATA = ? AND ORARIO BETWEEN ? AND ? " +
+							   "ORDER BY P.ORARIO;";
 				try {
 					PreparedStatement stmt = conn.prepareStatement(query);
 					stmt.setString(1, data.toString());
@@ -533,19 +622,26 @@ public class GestioneSistema {
 					}
 					ResultSet r = stmt.executeQuery();
 					while(r.next()) {
-//						prenotazioni.add(PrenotazioneDAO.readPrenotazione(r.getInt(1)));
 						ArrayList<String> temp = new ArrayList<>();
-						temp.add(r.getString(2));
-						temp.add(r.getString(3));
-						daStampare.put(PrenotazioneDAO.readPrenotazione(r.getInt(1)), temp);
+						temp.add(r.getString(6));
+						temp.add(r.getString(7));
+						LocalDate d = LocalDate.parse(r.getString(1));
+						LocalTime o = LocalTime.parse(r.getString(2));
+						String nomeFarmacia = r.getString(3);
+						String emailCliente = r.getString(4);
+						String nomeVaccino = r.getString(5);
+						daStampare.put(new Prenotazione(d,o,nomeFarmacia,emailCliente,nomeVaccino), temp);
+						System.out.println("debug");
+						
+
 					}
 				}catch(SQLException e) {
-					throw new DAOException("Errore lettura Farmacie...");
+					throw new DAOException("Errore lettura Prenotazioni " + e.getMessage() + "\n" + e.getSQLState());
 				}finally {
 					DBManager.closeConnection();
 				}
 			}catch(SQLException e) {
-				throw new DBConnectionException("Errore connessione database...");
+				throw new OperationException("Errore connessione database...");
 			}
 		}catch(DAOException e) {
 			throw new OperationException(e.getMessage());
@@ -565,11 +661,13 @@ public class GestioneSistema {
 		}
 	}
 	
-	public void inserisciDatiPaziente(String datiAnamnestici, String emailCliente) throws DAOException, DBConnectionException,OperationException{
+	public void inserisciDatiPaziente(String datiAnamnestici, String emailCliente) throws OperationException{
 		Cliente c=null;
 		try {
 			c = ClienteDAO.readCliente(emailCliente);
 		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
 			throw new OperationException(e.getMessage());
 		}
 		c.setDatiAnamnestici(datiAnamnestici);
@@ -577,22 +675,34 @@ public class GestioneSistema {
 			ClienteDAO.updateCliente(c, emailCliente);
 		}catch(DAOException e) {
 			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
 		}
 	}
 	
-	public void inserisciDatiVaccinazione(String usernameFarmacista ,String emailCliente, String esito, String motivazione) throws DAOException, DBConnectionException,OperationException{
+	public void inserisciDatiVaccinazione(LocalDate data,String usernameFarmacista ,String emailCliente, String esito, String motivazione) throws OperationException{
 		int codicePrenotazione, codiceVaccinazione;
 		Prenotazione p = null;
 		Vaccinazione v = null;
 		//Il check su esito/motivazione viene fatto a monte
 		try {
-			codicePrenotazione = PrenotazioneDAO.getCodice(LocalDate.now(), emailCliente);
+			codicePrenotazione = PrenotazioneDAO.getCodice(data, emailCliente);
 			codiceVaccinazione = VaccinazioneDAO.getCodice(codicePrenotazione);
+//			System.out.println(codicePrenotazione + " " + codiceVaccinazione);
 			Farmacista f = FarmacistaDAO.readFarmacista(usernameFarmacista);
+//			System.out.println(f.getNome() + " " +f.getCognome() + f.getNomeFarmacia());
 			p  = PrenotazioneDAO.readPrenotazione(codicePrenotazione);
-			v = new Vaccinazione(esito, motivazione, p, f);
+//			System.out.println(p.getCodice() + " " + p.getEmailCliente() + " " + p.getData());
+			v = new Vaccinazione(codicePrenotazione, f.getNomeFarmacia());
+			v.setCodice(codiceVaccinazione);
+			v.setEsito(esito);
+			v.setMotivazione(motivazione);
+			v.setUsernameFarmacista(usernameFarmacista);
+//			System.out.println(v.getCodice() + " " + v.getCodicePrenotazione() + " " + v.getNomeFarmacia());
 			VaccinazioneDAO.updateVaccinazione(v, codiceVaccinazione);
 		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
 			throw new OperationException(e.getMessage());
 		}
 		
@@ -603,6 +713,8 @@ public class GestioneSistema {
 				cS.save();
 			}catch(DAOException e) {
 				throw new OperationException(e.getMessage());
+			}catch(DBConnectionException e) {
+				throw new OperationException(e.getMessage());
 			}
 		}
 	}
@@ -611,70 +723,78 @@ public class GestioneSistema {
 	//commentata perchè viene gestito in inserisciDAtiVaccinazione
 	
 	
-	public void inviaReportStatisticoGiornaliero(String emailImpiegato)throws DAOException, DBConnectionException,OperationException {
+	public void inviaReportStatisticoGiornaliero(String emailImpiegato)throws OperationException {
 		ArrayList <String> nomiFarmacie = null;
-		String corpo = "Report statistico giornaliero: ";
+		String corpo = "Report statistico giornaliero: \n\n";
 		try {
 			nomiFarmacie = getNomiFarmacie();
+			for(String nomeFarmacia : nomiFarmacie) {
+				CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
+				corpo = corpo.concat("Farmacia: " + cS.getNomeFarmacia());
+				corpo = corpo.concat("\nNumero prenotazioni giornaliere: " + cS.getNumeroPrenotazioniGiornaliere());
+				corpo = corpo.concat("\nNumero vaccinazioni giornaliere: " + cS.getNumeroVaccinazioniGiornaliere());
+				corpo = corpo.concat("\nNumero annullamenti giornalieri: " + cS.getNumeroAnnullamentiGiornalieri());
+				corpo = corpo.concat("\n\n");
+//				System.out.println(corpo);
+			}
+			
 		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
+			throw new OperationException(e.getMessage());
+		}
+		inviaMail(emailImpiegato, corpo);
+	}
+	
+	public void inviaReportStatisticoSettimanale(String emailImpiegato)throws OperationException {
+		ArrayList <String> nomiFarmacie = null;
+		String corpo = "Report statistico settimanale: \n\n";
+		try {
+			nomiFarmacie = getNomiFarmacie();
+			for(String nomeFarmacia : nomiFarmacie) {
+				CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
+				corpo = corpo.concat("Farmacia: " + cS.getNomeFarmacia());
+				corpo = corpo.concat("\nNumero prenotazioni settimanali: " + cS.getNumeroPrenotazioniSettimanali());
+				corpo = corpo.concat("\nNumero vaccinazioni settimanali: " + cS.getNumeroVaccinazioniSettimanali());
+				corpo = corpo.concat("\nNumero annullamenti settimanali: " + cS.getNumeroAnnullamentiSettimanali());
+				corpo = corpo.concat("\n\n");
+			}
+		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
 			throw new OperationException(e.getMessage());
 		}
 		
-		for(String nomeFarmacia : nomiFarmacie) {
-			CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
-			corpo.concat("Farmacia: " + cS.getNomeFarmacia());
-			corpo.concat("\nNumero prenotazioni giornaliere: " + cS.getNumeroPrenotazioniGiornaliere());
-			corpo.concat("\nNumero vaccinazioni giornaliere: " + cS.getNumeroVaccinazioniGiornaliere());
-			corpo.concat("\nNumero annullamenti giornalieri: " + cS.getNumeroAnnullamentiGiornalieri());
-			corpo.concat("\n\n");
-		}
+		
 		
 		inviaMail(emailImpiegato, corpo);
 	}
 	
-	public void inviaReportStatisticoSettimanale(String emailImpiegato)throws DAOException, DBConnectionException,OperationException {
+	public void inviaReportStatisticoMensile(String emailImpiegato)throws OperationException {
 		ArrayList <String> nomiFarmacie = null;
-		String corpo = "Report statistico settimanale: \n";
+		String corpo = "Report statistico mensile: \n\n";
 		try {
 			nomiFarmacie = getNomiFarmacie();
+			for(String nomeFarmacia : nomiFarmacie) {
+				CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
+				corpo = corpo.concat("Farmacia: " + cS.getNomeFarmacia());
+				corpo = corpo.concat("\nNumero prenotazioni Mensili: " + cS.getNumeroPrenotazioniMensili());
+				corpo = corpo.concat("\nNumero vaccinazioni Mensili: " + cS.getNumeroVaccinazioniMensili());
+				corpo = corpo.concat("\nNumero annullamenti Mensili: " + cS.getNumeroAnnullamentiMensili());
+				corpo = corpo.concat("\n\n");
+			}
 		}catch(DAOException e) {
+			throw new OperationException(e.getMessage());
+		}catch(DBConnectionException e) {
 			throw new OperationException(e.getMessage());
 		}
 		
-		for(String nomeFarmacia : nomiFarmacie) {
-			CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
-			corpo.concat("Farmacia: " + cS.getNomeFarmacia());
-			corpo.concat("\nNumero prenotazioni settimanali: " + cS.getNumeroPrenotazioniSettimanali());
-			corpo.concat("\nNumero vaccinazioni settimanali: " + cS.getNumeroVaccinazioniSettimanali());
-			corpo.concat("\nNumero annullamenti settimanali: " + cS.getNumeroAnnullamentiSettimanali());
-			corpo.concat("\n\n");
-		}
+		
 		
 		inviaMail(emailImpiegato, corpo);
 	}
 	
-	public void inviaReportStatisticoMensile(String emailImpiegato)throws DAOException, DBConnectionException,OperationException {
-		ArrayList <String> nomiFarmacie = null;
-		String corpo = "Report statistico mensile: \n";
-		try {
-			nomiFarmacie = getNomiFarmacie();
-		}catch(DAOException e) {
-			throw new OperationException(e.getMessage());
-		}
-		
-		for(String nomeFarmacia : nomiFarmacie) {
-			CartellaStatistica cS = CartellaStatisticaDAO.readCartellaStatistica(nomeFarmacia);
-			corpo.concat("Farmacia: " + cS.getNomeFarmacia());
-			corpo.concat("\nNumero prenotazioni Mensili: " + cS.getNumeroPrenotazioniMensili());
-			corpo.concat("\nNumero vaccinazioni Mensili: " + cS.getNumeroVaccinazioniMensili());
-			corpo.concat("\nNumero annullamenti Mensili: " + cS.getNumeroAnnullamentiMensili());
-			corpo.concat("\n\n");
-		}
-		
-		inviaMail(emailImpiegato, corpo);
-	}
-	
-	public void inviaElencoTurni(String emailImpiegato) throws DAOException, DBConnectionException,OperationException{
+	public void inviaElencoTurni(String emailImpiegato) throws OperationException{
 		ArrayList<String> usernameFarmacisti = null;
 		LocalDate data2 = LocalDate.now();
 		LocalDate data1 = data2.minusMonths(1);
@@ -684,9 +804,10 @@ public class GestioneSistema {
 			usernameFarmacisti = getUsernameFarmacisti();
 			for (String usernameFarmacista : usernameFarmacisti) {
 				try {
-					corpo.concat(usernameFarmacista + ":\n");
+					corpo = corpo.concat(usernameFarmacista + ":\n");
 					Connection conn = DBManager.getConnection();
 					String query = "SELECT * FROM TURNI WHERE FARMACISTA = ? AND DATA BETWEEN ? AND ?";
+//					String query = "SELECT * FROM TURNI WHERE FARMACISTA = ?;";
 					PreparedStatement stmt = conn.prepareStatement(query);
 					stmt.setString(1, usernameFarmacista);
 					stmt.setString(2, data1.toString());
@@ -694,14 +815,14 @@ public class GestioneSistema {
 					
 					ResultSet r = stmt.executeQuery();
 					while(r.next()) {
-						corpo.concat(r.getString(2) + " ");
-						if(r.getInt(3) == 0) corpo.concat("mattina\n");
-						else corpo.concat("pomeriggio-sera\n");
+						corpo = corpo.concat(r.getString(2) + " ");
+						if(r.getInt(3) == 0) corpo = corpo.concat("mattina\n");
+						else corpo = corpo.concat("pomeriggio-sera\n");
 					}
 				}catch(SQLException e) {
 					throw new DBConnectionException(e.getMessage());
 				}
-				corpo.concat("\n");
+				corpo = corpo.concat("\n");
 			}
 		}catch(DBConnectionException e) {
 			throw new OperationException(e.getMessage());

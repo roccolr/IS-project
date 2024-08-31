@@ -7,7 +7,7 @@ public class Vaccinazione {
 	private String esito;
 	private String motivazione;
 	private int codice;
-	private int codicePrenotazione;
+	private int codicePrenotazione = -1;
 	private String usernameFarmacista;
 	private String nomeFarmacia;
 	private Prenotazione prenotazione;
@@ -49,22 +49,24 @@ public class Vaccinazione {
 	}
 	
 	public String getUsernameFarmacista() throws DAOException, DBConnectionException {
-		this.usernameFarmacista = VaccinazioneDAO.getUsernameFarmacista(this);
+//		this.usernameFarmacista = VaccinazioneDAO.getUsernameFarmacista(this);
 		return this.usernameFarmacista;
 	}
 	
 	public String getNomeFarmacia()throws DAOException, DBConnectionException  {
-		this.nomeFarmacia = VaccinazioneDAO.getNomeFarmacia(this);
+//		this.nomeFarmacia = VaccinazioneDAO.getNomeFarmacia(this);
 		return this.nomeFarmacia;
 	}
 	
 	public int getCodice() throws DAOException, DBConnectionException{
-		this.codice = VaccinazioneDAO.getCodice(this);
+//		this.codice = VaccinazioneDAO.getCodice(this);
 		return this.codice;
 	}
 	
 	public int getCodicePrenotazione() throws DAOException, DBConnectionException {
-		this.codicePrenotazione = VaccinazioneDAO.getCodicePrenotazione(this);
+		if(this.codicePrenotazione == -1) {
+			this.codicePrenotazione = VaccinazioneDAO.getCodicePrenotazione(this);	
+		}
 		return this.codicePrenotazione;
 	}
 	
@@ -95,7 +97,7 @@ public class Vaccinazione {
 	}
 	
 	public  void save() throws DAOException, DBConnectionException{
-		VaccinazioneDAO.createVaccinazione(this);
+		VaccinazioneDAO.createVaccinazione(this.codicePrenotazione, this.nomeFarmacia);
 	}
 	
 }

@@ -15,7 +15,7 @@ public class ClienteDAO {
 				stmt.setString(2, c.getNome());
 				stmt.setString(3, c.getCognome());
 				stmt.setString(4, c.getAllergie());
-				stmt.setNull(1, Types.VARCHAR);
+				stmt.setNull(5, Types.VARCHAR);
 				
 				stmt.executeUpdate();
 			}catch (SQLException e){
@@ -32,7 +32,7 @@ public class ClienteDAO {
 		Cliente c = null;
 		try {
 			Connection conn = DBManager.getConnection();
-			String query = "SELECT * FROM CLIENTI WHERE USERNAME = ?;";
+			String query = "SELECT * FROM CLIENTI WHERE EMAIL = ?;";
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setString(1, email);

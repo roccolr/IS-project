@@ -56,10 +56,10 @@ public class FarmacistaDAO {
 				
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
-					f = new Farmacista(r.getString(2), r.getString(3), r.getString(1), r.getString(4), r.getBoolean(5), r.getString(6));
+					f = new Farmacista(r.getString(2), r.getString(3), r.getString(1), r.getString(4), r.getBoolean(6),r.getString(5));
 				}
 			}catch(SQLException e) {
-				throw new DAOException("Errore lettura Farmacista...");
+				throw new DAOException("Errore lettura Farmacista... " + e.getMessage());
 			}finally {
 				DBManager.closeConnection();
 			}

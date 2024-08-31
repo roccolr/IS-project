@@ -16,14 +16,35 @@ public class BCapoFarmacia {
 		return password;
 	}
 	
-	public void registraFarmacista(String nome, String cognome, String nomeFarmacia, String emailFarmacista, boolean dipendente) {
+	private String generaEmail(String nome, String cognome) {
+		Random r = new Random();
+		String email = nome+cognome+r.nextInt(10)+"@italfarmaciefarmacisti.it";
+		return email;
+	}
+	
+	public void registraFarmacista(String nome, String cognome, String nomeFarmacia,boolean dipendente) {
 		GestioneSistema gS = GestioneSistema.getIstance();
 		try {
-			gS.registraFarmacista(nome, cognome, generaUsername(nome,cognome), generaPassword(nome,cognome), nomeFarmacia,emailFarmacista, dipendente);
+			gS.registraFarmacista(nome, cognome, generaUsername(nome,cognome), generaPassword(nome,cognome), nomeFarmacia,generaEmail(nome, cognome), dipendente);
 		}catch (OperationException e) {
 			System.out.println(e.getMessage());
 		}
 	}
-	public void inserisciTurni() {}
-	public void cancellaAppuntamento() {}
+	public void cancellaAppuntamento(int codicePrenotazione) {
+		GestioneSistema gS = GestioneSistema.getIstance();
+		try {
+			gS.cancellaAppuntamento(codicePrenotazione);
+		}catch (OperationException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public void inserisciTurni(String nomeFarmacia) {
+		GestioneSistema gS = GestioneSistema.getIstance();
+		try {
+			gS.inserisciTurniSettimana(nomeFarmacia);
+		}catch (OperationException e) {
+			System.out.println(e.getMessage());
+		}
+	}
 }

@@ -1,7 +1,6 @@
 package database;
 import java.sql.*;
 
-import entity.CapoFarmacia;
 import entity.Vaccinazione;
 import exception.DAOException;
 import exception.DBConnectionException;
@@ -102,7 +101,7 @@ public class VaccinazioneDAO {
 				if(r.next()) {
 					nomeFarmacia = r.getString(1);
 				}
-				else throw new DAOException("Errore: Nessuna riscontro trovato nel DB...");
+				else throw new DAOException("Errore: Nessun riscontro trovato nel DB...");
 			}catch (SQLException e) {
 				throw new DAOException("Errore query Vaccinazione...");
 			}catch(DAOException d) {
@@ -120,18 +119,18 @@ public class VaccinazioneDAO {
 		int codicePrenotazione = -1;
 		try {
 			Connection conn = DBManager.getConnection();
-			String query = "SELECT V.CODICEPRENOTAZIONE FROM VACCINAZIONI V JOIN PRENOTAZIONI P ON V.CODICEPRENOTAZIONE = P.CODICE WHERE P.CODICE = ?;";
+			String query = "SELECT P.CODICE FROM VACCINAZIONI V JOIN PRENOTAZIONI P ON V.CODICEPRENOTAZIONE = P.CODICE WHERE P.CODICE = ?;";
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setInt(1, v.getCodice());
-				
+				System.out.println("debug");
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
 					codicePrenotazione = r.getInt(1);
 				}
-				else throw new DAOException("Errore: Nessuna riscontro trovato nel DB...");
+				else throw new DAOException("Errore: Nessun riscontro trovato nel DB...");
 			}catch (SQLException e) {
-				throw new DAOException("Errore  query Vaccinazione...");
+				throw new DAOException("Errore  query Vaccinazione..." + " " + e.getMessage());
 			}catch(DAOException d) {
 				System.out.println(d.getMessage());
 			}finally {
@@ -170,15 +169,16 @@ public class VaccinazioneDAO {
 //	}
 	
 	
-	public static void createVaccinazione(Vaccinazione v) throws DAOException, DBConnectionException{
+	public static void createVaccinazione(int codicePrenotazione, String nomeFarmacia) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
 			String query = "INSERT INTO VACCINAZIONI (CODICEPRENOTAZIONE, NOMEFARMACIA) VALUES (?, ?);";
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
-				stmt.setInt(1, v.getCodicePrenotazione());
-				stmt.setString(2, v.getNomeFarmacia());
+				stmt.setInt(1, codicePrenotazione);
+				stmt.setString(2, nomeFarmacia);
 				
+//				System.out.println(codicePrenotazione + " " + nomeFarmacia);
 				stmt.executeUpdate();
 			}catch (SQLException e) {
 				throw new DAOException("Errore creazione Vaccinazione...");
@@ -200,10 +200,11 @@ public class VaccinazioneDAO {
 				stmt.setString(2, v.getMotivazione());
 				stmt.setInt(3, v.getCodicePrenotazione());
 				stmt.setString(4, v.getUsernameFarmacista());
-				stmt.setString(6, v.getNomeFarmacia());
-				stmt.setInt(7, oldCodice);
+				stmt.setString(5, v.getNomeFarmacia());
+				stmt.setInt(6, oldCodice);
+//				System.out.println("debug");
 				
-				
+
 				stmt.executeUpdate();
 			}catch(SQLException e) {
 				throw new DAOException("Errore aggiornamento Vaccinazione...");

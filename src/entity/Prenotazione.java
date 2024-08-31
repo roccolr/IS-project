@@ -3,7 +3,7 @@ import java.time.*;
 import database.PrenotazioneDAO;
 import exception.*;
 
-public class Prenotazione {
+public class Prenotazione implements Comparable<Prenotazione>{
 	private LocalDate data;
 	private LocalTime orario;
 	private Farmacia farmacia;
@@ -14,6 +14,11 @@ public class Prenotazione {
 	private String nomeVaccino;
 	private int codice;
 //	private Vaccinazione vaccinazione;
+	
+	public int compareTo(Prenotazione p) {
+		int risultatoComparazione = this.orario.compareTo(p.orario);
+		return risultatoComparazione;
+	}
 	
 	public Prenotazione(LocalDate data, LocalTime orario, Farmacia farmacia, Cliente cliente, Vaccino vaccino) {
 		this.data = data;
@@ -101,5 +106,15 @@ public class Prenotazione {
 	
 	public void save() throws DAOException, DBConnectionException{
 		PrenotazioneDAO.createPrenotazione(this);
+	}
+	
+	public boolean isAlreadySaved() throws DAOException, DBConnectionException{
+		try {
+			int num = PrenotazioneDAO.getConteggioPrenotazioni(this);
+			if (num > 0) return true;
+			else return false;
+		}catch(DAOException e) {
+			throw e;
+		}
 	}
 }
