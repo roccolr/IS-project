@@ -10,10 +10,18 @@ public class Turno {
 	private int codice;
 	private String usernameFarmacista;
 	
+	public Turno(int tipo, LocalDate data, String usernameFarmacista,int codice) {
+		this.tipo=tipo;
+		this.data=data;
+		this.usernameFarmacista = usernameFarmacista;
+		this.codice=codice;
+	}
+	
 	public Turno(int tipo, LocalDate data, String usernameFarmacista) {
 		this.tipo=tipo;
 		this.data=data;
 		this.usernameFarmacista = usernameFarmacista;
+
 	}
 	
 	public int getTipo() {
@@ -28,7 +36,7 @@ public class Turno {
 	}
 	
 	public int getCodice() throws DAOException, DBConnectionException{
-		this.codice = TurnoDAO.getCodice(data.toString(), usernameFarmacista);
+//		this.codice = TurnoDAO.getCodice(data.toString(), usernameFarmacista);
 		return this.codice;
 	}
 	

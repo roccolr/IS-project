@@ -1,0 +1,5 @@
+INDEX VERSION 1.134+C:\Users\lavel\Desktop\Università\3°anno_2°semestre\Ingegneria_del_software\IS-project-main\IS-project-main\.metadata\.plugins\org.eclipse.jdt.core
+3959137331.index
+1067094681.index
+1865797976.index
+416991491.index

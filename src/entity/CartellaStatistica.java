@@ -114,23 +114,59 @@ public class CartellaStatistica {
     	numeroPrenotazioniGiornaliere++;
     	numeroPrenotazioniSettimanali++;
     	numeroPrenotazioniMensili++;
+    	try {
+			update();
+		} catch (DAOException e) {
+			e.printStackTrace();
+		} catch (DBConnectionException e) {
+			e.printStackTrace();
+		} catch (OperationException e) {
+			e.printStackTrace();
+		}
     } 
     
     public void incrementaVaccinazioni() {
     	numeroVaccinazioniGiornaliere++;
     	numeroVaccinazioniSettimanali++;
     	numeroVaccinazioniMensili++;
+    	try {
+			update();
+		} catch (DAOException e) {
+			e.printStackTrace();
+		} catch (DBConnectionException e) {
+			e.printStackTrace();
+		} catch (OperationException e) {
+			e.printStackTrace();
+		}
+
     }
     
     public void incrementaAnnullamenti() {
     	numeroAnnullamentiGiornalieri++;
     	numeroAnnullamentiSettimanali++;
     	numeroAnnullamentiMensili++;
+    	try {
+			update();
+		} catch (DAOException e) {
+			e.printStackTrace();
+		} catch (DBConnectionException e) {
+			e.printStackTrace();
+		} catch (OperationException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public void update() throws DAOException, DBConnectionException, OperationException{
+    	try {
+    		CartellaStatisticaDAO.updateCartellaStatistica(this, nomeFarmacia);
+    	}catch(DAOException e) {
+    		throw new OperationException(e.getMessage());
+    	}
     }
     
     public void save() throws DAOException, DBConnectionException, OperationException{
     	try {
-    		CartellaStatisticaDAO.updateCartellaStatistica(this, nomeFarmacia);
+    		CartellaStatisticaDAO.createCartellaStatistica(this);
     	}catch(DAOException e) {
     		throw new OperationException(e.getMessage());
     	}

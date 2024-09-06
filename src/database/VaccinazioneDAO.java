@@ -123,7 +123,7 @@ public class VaccinazioneDAO {
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				stmt.setInt(1, v.getCodice());
-				System.out.println("debug");
+//				System.out.println("debug");
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
 					codicePrenotazione = r.getInt(1);
@@ -190,6 +190,32 @@ public class VaccinazioneDAO {
 		}
 	}
 	
+	public static String readEsitoVaccinazione(int codicePrenotazione) throws DAOException, DBConnectionException{
+		String esito=null;
+
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT ESITO FROM VACCINAZIONI WHERE CODICEPRENOTAZIONE=?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setInt(1, codicePrenotazione);
+				ResultSet r = stmt.executeQuery();
+
+//				System.out.println(codicePrenotazione + " " + nomeFarmacia);
+				if(r.next()) {
+					esito = r.getString(1);
+				}
+			}catch (SQLException e) {
+				throw new DAOException("Errore lettura esito Vaccinazione..."+e.getMessage());
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return esito;
+	}
+	
 	public static void updateVaccinazione(Vaccinazione v, int oldCodice)throws DAOException, DBConnectionException {
 		try {
 			Connection conn = DBManager.getConnection();
@@ -235,6 +261,4 @@ public class VaccinazioneDAO {
 			throw new DBConnectionException("Errore connessione database...");
 		}
 	}
-	
-
 }

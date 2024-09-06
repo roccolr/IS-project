@@ -8,7 +8,7 @@ import exception.DAOException;
 import exception.DBConnectionException;
 
 public class AfferenzaDAO {
-	public static void createAfferernza(String nomeFarmacia, String usernameCapoFarmacia) throws DAOException, DBConnectionException{
+	public static void createAfferenza(String nomeFarmacia, String usernameCapoFarmacia) throws DAOException, DBConnectionException{
 		try {
 			Connection conn = DBManager.getConnection();
 
@@ -19,11 +19,12 @@ public class AfferenzaDAO {
 				
 				stmt.setString(1, nomeFarmacia);
 				stmt.setString(2, usernameCapoFarmacia);
+				System.out.println(nomeFarmacia+ " " + usernameCapoFarmacia );
 
 				stmt.executeUpdate();
 
 			}catch(SQLException e) {
-				throw new DAOException("Errore scrittura Afferenza...");
+				throw new DAOException("Errore scrittura Afferenza..."+e.getMessage());
 			} finally {
 				DBManager.closeConnection();
 			}
@@ -48,17 +49,20 @@ public class AfferenzaDAO {
 				ResultSet r = stmt.executeQuery();
 				if(r.next()) {
 					farmacia = r.getString(1);
+//					System.out.println(farmacia);
 				}
-
 			}catch(SQLException e) {
 				throw new DAOException("Errore lettura Afferenza...");
 			} finally {
 				DBManager.closeConnection();
+				
 			}
 		
 		}catch(SQLException e) {
 			throw new DBConnectionException("Errore connessione database");
 		}
+		System.out.println(farmacia);
+
 		return farmacia;
 	}
 	

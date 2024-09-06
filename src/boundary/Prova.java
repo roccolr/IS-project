@@ -2,16 +2,18 @@ package boundary;
 //import database.*;
 //import java.sql.*;
 import control.GestioneSistema;
+import entity.Vaccino;
 import exception.OperationException;
 
-import java.time.LocalDate;
+//import java.time.LocalDate;
 
 public class Prova {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+//		prova.createFarmacia()
 //		BCapoFarmacia prova = new BCapoFarmacia();
-//		prova.registraFarmacista("Luca", "Giordano", "Farmacia Centrale", "lucagiordano@libero.it", false);
+//		prova.registraFarmacista("Luca", "Giordano", "Farmacia Centrale", false);
 //		
 //		try {
 //			Connection conn = DBManager.getConnection();
@@ -29,13 +31,24 @@ public class Prova {
 //		}catch(SQLException e) {
 //			System.out.println(e.getMessage());
 //		}
-		Dirigente dirigente = new Dirigente();
-		BCapoFarmacia cF = new BCapoFarmacia();
 		BCliente cliente = new BCliente();
-		BFarmacista farmacista = new BFarmacista();
-//		cliente.prenotaVaccino("Farmacia Centrale", "2024-09-01", "PFISCHIO", "Maccio", "Capatonda", "macciocapatonda@hotmail.it", "Povere e graminacee");
-//		cliente.prenotaVaccino("Farmacia Palermo", "2025-01-01", "ASPERAZENZERO", "Valentino", "Rossi", "valerossidoc@ducati.it", "lentezza");
-//		cliente.prenotaVaccino("Farmacia Firenze", "2024-09-01", "ANTIQUA", "Alexander", "Sink", "alesink@coldmail.it", "python");
+		try {
+			cliente.prenotaVaccino("Farmacia Centrale", "01/09/2025", "PFISCHIO", "Maccio", "Capatonda", "macciocapatonda@hotmail.it", "Polvere e graminacee");
+		} catch(OperationException e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			cliente.prenotaVaccino("Farmacia Palermo", "30/02/2025", "ASPERAZENZERO", "Valentino", "Rossi", "valerossidoc@ducati.it", "lentezza");
+		} catch (OperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			cliente.prenotaVaccino("Farmacia Firenze", "18/09/2024", "ANTIQUA", "Alexander", "Sink", "alesink@coldmail.it", "python");
+		} catch (OperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		BFarmacista farmacista = new BFarmacista();
 		
 //		cliente.prenotaVaccino("Farmacia Napoli", "2024-10-11", "PFISCHIO", "Romelu", "Lukaku", "bigrom@adlpappone.it", "juve");
@@ -62,7 +75,11 @@ public class Prova {
 		
 //		cF.inserisciTurni("Farmacia Bologna");
 		
-//		cliente.prenotaVaccino("Farmacia Bologna", "2024-08-31", "PFISCHIO", "Bruno", "Raspadori", "raspadori@esempio.it", "polvere");
+		try {
+			cliente.prenotaVaccino("Farmacia Bologna", "30/02/2025", Vaccino.PFISCHIO, "Brino", "Raspiadoru", "rasideissrssu@esempio.it", "polvere");
+		} catch (OperationException e) {
+			e.printStackTrace();
+		}
 //		farmacista.stampaAppuntamenti("GiorgiaMeloni6486", LocalDate.parse("2024-08-31"));
 //		farmacista.inserisciDatiPaziente("Amsterdamite", "alesink@coldmail.it");
 //		farmacista.inserisciDatiVaccinazione("2024-08-31","GiorgiaMeloni", "giuliarossi@esempio.it", "Negativo", "Assenza");

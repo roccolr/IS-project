@@ -1,6 +1,6 @@
 package database;
 import java.sql.*;
-
+import entity.Vaccino;
 //import entity.CapoFarmacia;
 import entity.Prenotazione;
 //import entity.Farmacia;
@@ -153,7 +153,6 @@ public class PrenotazioneDAO {
 			Connection conn = DBManager.getConnection();
 
 			String query = "SELECT P.CODICE, P.DATA, P.ORARIO, P.VACCINO, V.NOMEFARMACIA, P.EMAILCLIENTE FROM PRENOTAZIONI P JOIN VACCINAZIONI V ON P.CODICE = V.CODICEPRENOTAZIONE WHERE P.CODICE = ?;";
-
 			try {
 				PreparedStatement stmt = conn.prepareStatement(query);
 				
@@ -163,7 +162,7 @@ public class PrenotazioneDAO {
 				if(r.next()) {
 					LocalDate data = LocalDate.parse(r.getString(2));
 					LocalTime orario = LocalTime.parse(r.getString(3));
-					p = new Prenotazione(data, orario, r.getString(5), r.getString(6) , r.getString(4));
+					p = new Prenotazione(data, orario, r.getString(5), r.getString(6) , Vaccino.valueOf(r.getString(4)));
 				}
 				else {
 					throw new DAOException("Errore: Nessuna Prenotazione trovata...");
@@ -171,8 +170,6 @@ public class PrenotazioneDAO {
 
 			}catch(SQLException e) {
 				throw new DAOException("Errore lettura Prenotazione...");
-			}catch(DAOException ee) {
-				System.out.println(ee.getMessage());
 			}finally {
 				DBManager.closeConnection();
 			}

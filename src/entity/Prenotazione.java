@@ -28,7 +28,7 @@ public class Prenotazione implements Comparable<Prenotazione>{
 		this.vaccino = vaccino;
 	}
 	
-	public Prenotazione(LocalDate data, LocalTime orario, String nomeFarmacia, String emailCliente, String nomeVaccino) {
+	public Prenotazione(LocalDate data, LocalTime orario, String nomeFarmacia, String emailCliente, Vaccino nomeVaccino) {
 		this.farmacia = null;
 		this.cliente = null;
 		this.vaccino = null;
@@ -37,7 +37,7 @@ public class Prenotazione implements Comparable<Prenotazione>{
 		this.orario=orario;
 		this.nomeFarmacia = nomeFarmacia;
 		this.emailCliente = emailCliente;
-		this.nomeVaccino = nomeVaccino;
+		this.nomeVaccino = nomeVaccino.toString();
 	}
 	
 	public LocalDate getData() {

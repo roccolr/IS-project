@@ -1,5 +1,7 @@
 package database;
 import java.sql.*;
+import java.util.ArrayList;
+
 import entity.CapoFarmacia;
 import exception.DAOException;
 import exception.DBConnectionException;
@@ -57,6 +59,57 @@ public class CapoFarmaciaDAO {
 		}
 		return eCF;
 	}
+	
+	
+	public static ArrayList<String> readUsernameCapiFarmacia()throws DAOException, DBConnectionException{
+		ArrayList <String> usernameCapiFarmacia = new ArrayList<>(); //lista da ritornare
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT USERNAME FROM CAPIFARMACIA;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				
+				ResultSet r = stmt.executeQuery();
+				while(r.next()) {
+					usernameCapiFarmacia.add(r.getString(1));
+				}
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura CapiFarmacia..." +e.getMessage());
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return usernameCapiFarmacia;
+	}
+	
+	
+	public static String readPasswordByUsernameCapiFarmacia(String username)throws DAOException, DBConnectionException{
+		String passwordCapoFarmacia = null; 
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT PASSWORD FROM CAPIFARMACIA WHERE USERNAME=?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setString(1, username);
+
+				ResultSet r = stmt.executeQuery();
+				while(r.next()) {
+					passwordCapoFarmacia=r.getString(1);
+				}
+				
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura CapiFarmacia..." +e.getMessage());
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return passwordCapoFarmacia;
+	}
+	
 	
 	public static void updateCapoFarmacia(CapoFarmacia cf, String oldUsername) throws DAOException, DBConnectionException{
 		try {

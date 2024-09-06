@@ -1,6 +1,7 @@
 package entity;
 import java.util.*;
 
+
 public class Farmacia {
 	private String nome;
 	private String indirizzo;
@@ -15,6 +16,7 @@ public class Farmacia {
 		this.email = email;
 		this.farmacisti = new ArrayList<>();
 	}
+
 	
 	public String getNome() {
 		return this.nome;

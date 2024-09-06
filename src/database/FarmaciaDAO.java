@@ -2,8 +2,12 @@ package database;
 import entity.Farmacia;
 import java.util.*;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import exception.DAOException;
 import exception.DBConnectionException;
+import exception.OperationException;
 
 public class FarmaciaDAO {
 	public static void createFarmacia(Farmacia f) throws DAOException, DBConnectionException {
@@ -37,6 +41,53 @@ public class FarmaciaDAO {
 			throw new DBConnectionException("Errore connessione database...");
 		}
 	}
+	
+//	public static ArrayList<String> readUsernameFarmacistiFromFarmacia(Farmacia f) throws DAOException, DBConnectionException {
+//		 ArrayList<String>unsernameFarmacisti=new ArrayList<String>();
+//       
+//		try {
+//			Connection conn = DBManager.getConnection();
+//			String query = "SELECT USERNAME FROM FARMACISTI F JOIN FARMACIE ON F.FARMACIA=? ";
+//			try {
+//				PreparedStatement stmt = conn.prepareStatement(query);
+//				stmt.setString(1, f.getNome());
+//
+//				
+//				stmt.executeUpdate();
+//			}catch(SQLException e) {
+//				throw new DAOException("Errore creazione Farmacia...");
+//			}finally {
+//				DBManager.closeConnection();
+//			}
+//		}catch(SQLException e) {
+//			throw new DBConnectionException("Errore connessione database...");
+//		}
+//		return unsernameFarmacisti;
+//	}
+	
+	public static ArrayList<String> readNomiFarmacie() throws DAOException, DBConnectionException{
+		ArrayList <String> nomiFarmacie = new ArrayList<>(); //lista da ritornare
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT NOME FROM FARMACIE;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				
+				ResultSet r = stmt.executeQuery();
+				while(r.next()) {
+					nomiFarmacie.add(r.getString(1));
+				}
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura Farmacie...");
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return nomiFarmacie;
+	}
+	
 	
 	public static Farmacia readFarmaciaFromNome(String nome) throws DAOException, DBConnectionException{
 		Farmacia f = null;
@@ -126,6 +177,32 @@ public class FarmaciaDAO {
 		}catch(SQLException e) {
 			throw new DBConnectionException("Errore connessione database...");
 		}
+	}
+	
+	public static ArrayList<LocalTime> readOrari(LocalDate giorno, String nomeFarmacia)throws DAOException, DBConnectionException,OperationException{
+		ArrayList<LocalTime> listaOrari = new ArrayList<>();
+		try {
+			Connection conn = DBManager.getConnection();
+			String query = "SELECT ORARIO FROM PRENOTAZIONI P JOIN VACCINAZIONI V ON P.CODICE = V.CODICEPRENOTAZIONE WHERE NOMEFARMACIA = ? AND DATA=?;";
+			try {
+				PreparedStatement stmt = conn.prepareStatement(query);
+				stmt.setString(1, nomeFarmacia);
+				stmt.setString(2, giorno.toString());
+		    	System.out.println("Giorno richiesto per la prenotazione: "+giorno.toString());
+				ResultSet r = stmt.executeQuery();
+
+				while(r.next()) {
+					listaOrari.add(r.getTime(1).toLocalTime());
+				}
+			}catch(SQLException e) {
+				throw new DAOException("Errore lettura Orari...");
+			}finally {
+				DBManager.closeConnection();
+			}
+		}catch(SQLException e) {
+			throw new DBConnectionException("Errore connessione database...");
+		}
+		return listaOrari;
 	}
 	
 	public static void deleteFarmacia(String nome) throws DAOException, DBConnectionException{

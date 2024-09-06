@@ -31,7 +31,7 @@ public class CartellaStatisticaDAO {
 				stmt.executeUpdate();
 
 			}catch(SQLException e) {
-				throw new DAOException("Errore scrittura CapoFarmacia");
+				throw new DAOException("Errore scrittura CartellaStatistica");
 			} finally {
 				DBManager.closeConnection();
 			}
